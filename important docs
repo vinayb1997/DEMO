@@ -1,0 +1,144 @@
+https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/storage/blobs/blobfuse2-how-to-deploy.md
+https://learn.microsoft.com/en-us/azure/aks/outbound-rules-control-egress
+https://github.com/kubernetes-sigs/azurefile-csi-driver/blob/master/docs/csi-debug.md
+https://github.com/Azure/AKS/issues/2333
+https://learn.microsoft.com/en-us/azure/aks/configure-azure-cni-dynamic-ip-allocation
+https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#how-does-scale-down-work
+https://github.com/coredns/coredns/issues/4834
+https://www.azurespeed.com/Azure/Latency
+https://github.com/kubernetes/ingress-nginx#supported-versions-table
+https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/azure-private-dns.md
+https://github.com/VoltDB/voltdb/wiki/Voltcore
+------------------------
+Azure devops with service connection 
+ 
+1: Once you are in project you will see project settings -> Service connections-> new service connections -> Kubenetes -> 
+2: 3 different service connections methods (kubeconfig, service account, Azure subscription)
+3: Select service account which it is token based never expire 
+4: see NS in k8s cluster by connecting cluster
+5: get service account 
+kubectl get serviceaccount -n <namespace>
+kubectl get serviceaccount <name you get from above SA> -n <NS> -o yaml
+Check secret with name as above command
+kubectl get secret <enter above name> -n <NS>
+6: 3 values will be there ca.crt, namespace, token
+7: whole data we need to supply when we create service connection
+8: if you don't have a service account create by 
+kubectl create serviceaccount <newname> -n <NS>
+9: New service connection need to get cluster information
+kubectl cluster-info
+10: token make sure it is in json format 
+kubectl get secret <name of secret> -n <NS> -o json
+11: paste it in the connection window in UI portal in azure devops
+12: once done it will not create anyting you need to role and rolebinding
+kubectl get role -n <NS>
+kubectl get rolebinding -n <NS>
+13: need to have role and role binding.
+-----------------------------------
+curl $APISERVER/api/v1/namespaces --header "Authorization: Bearer $TOKEN" --insecure
+---------------------------------
+sudo apt-get install wget apt-transport-https gnupg lsb-release
+wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/nullecho "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+sudo apt-get update
+sudo apt-get install trivy -y
+------------------------------------
+sudo apt update
+sudo apt install ca-certificates curl gnupg
+ 
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+ 
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt update
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+sudo apt install docker-compose -y
+ 
+sudo service docker restart
+sudo chmod 666 /var/run/docker.sock
+sudo systemctl restart docker
+--------------------------------------------------
+az aks nodepool add --resource-group <resource-group-name> --cluster-name <cluster-name> --name <nodepool-name> --node-count 1 --kubernetes-version 1.26.6
+---------------------------------------------
+az vmss run-command invoke -g MC_mp-tre-test_mp-tre-test_northeurope -n aks-mainpool5-73833115-vmss --command-id RunShellScript --instance-id 417 --scripts "nslookup fac94ed3df8a040db93a7cd.file.core.windows.net"
+az vmss run-command invoke -g MC_mp-tre-test_mp-tre-test_northeurope -n aks-mainpool5-73833115-vmss --command-id RunShellScript --instance-id 417 --scripts "telnet fac94ed3df8a040db93a7cd.file.core.windows.net 445"
+az vmss run-command invoke -g MC_mp-tre-test_mp-tre-test_northeurope -n aks-mainpool5-73833115-vmss --command-id RunShellScript --instance-id 417 --scripts "curl -k https://fac94ed3df8a040db93a7cd.file.core.windows.net"
+---------------------------------------------------
+kubectl get --raw /metrics | grep apiserver_requested_deprecated_apis (Linux)
+kubectl get --raw /metrics | findstr apiserver_requested_deprecated_apis (Windows)
+-------------------------------------------------
+More specifically if node to node connectivity over port 10250 (kubelet) is blocked, that explains why webhooks are failing, as well as konnectivity being broken and calls to metris server endpoint failing. Lets ask customer to comfirm if this connectivty is ok by running the following command (tests telnet to port 10250 on node aks-systempool-22818869-vmss_1 from node aks-systempool-22818869-vmss_0):
+az vmss run-command invoke -g MC_cnpcs-pprd-rg_cnpsics-pprd-aks_northeurope -n aks-systempool-22818869-vmss --command-id RunShellScript --instance-id 0 --scripts "telnet 10.86.34.121 10250"
+-------------------------------------------------
+Kubelet in k8s supports no more than three DNS server entries in  /etc/resolv.conf on each node in the cluster.
+When there are more than three DNS server entries in  /etc/resolv.conf on a node, k8s reports this event.
+ 
+ 
+Can you check the /etc/resolv.conf file and see the DNS enteries there. The IP mentioned in the YAML are omitted one. May be because of this the customer is not able to reach the FQDN.
+ 
+Also check if customer is using dnsmasq (This provides more nameserver enteries) in their dev environment.
+------------------------------------------------
+labels of nodepool
+az aks nodepool update --resource-group <resource-group-name> --cluster-name <cluster-name> --name <nodepool-name> --labels <label-key1>=<label-value1> <label-key2>=<label-value2>
+--------------------------------------------------
+kubectl taint nodes <node_name> node.cloudprovider.kubernetes.io/uninitialized:NoSchedule-
+--------------------------------------------------
+to collect the tcp dumps on a windows  node pool, follow the below steps:
+Steps to connect to Windows Node and capture the network traces:-
+Create a standalone Windows VM in the same VNet as Windows Node.
+Ensure you can RDP to this Windows VM
+Now go to the VMSS which contains Windows Node and reset the password.
+Once the password reset is done, go to the Windows Instance. Select the instance one by one and click on “Upgrade” and then “Reimage”.  [This will reboot the node.]
+Note:- Only after you “upgrade” and “reimage” the instance, the username, and password will get assigned to the instance.
+Once done, RDP to the Windows VM.
+From the Windows VM, RDP to the Windows Node using its Private IP.
+Run the following command to capture the network traces
+netsh trace start capture=yes
+Reproduce the issue
+netsh trace stops
+Once network traces is stopped, it will be saved at c:\users\<username>\AppData\Local\Temp\NetTraces
+To copy the network traces follow the below steps
+Map the Windows node network drive to the local VM
+On the local Windows VM, go to “Network”
+Right-click and select “Map network drive”
+Enter the IP address of the Windows Node \\PrivateIPofWindowsNode\c$ and click on “Finish”
+This will map the network drive to the local Windows VM
+Go to the location and copy the folder from there.
+----------------------------------------------------------
+The NGINX Controller LoadBalancer Service has to have the following annotation:
+ 
+service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: /healthz
+-------------------------------------------------------
+readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: 80
+            initialDelaySeconds: 10
+            timeoutSeconds: 30
+            periodSeconds: 60
+            successThreshold: 1
+            failureThreshold: 5
+          livenessProbe:
+             httpGet:
+              path: /health/liveness
+              port: 80
+             initialDelaySeconds: 10
+             timeoutSeconds: 5
+             periodSeconds: 15
+             successThreshold: 1
+             failureThreshold: 3 
+--------------------------------
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/use-forwarded-headers: "true"
+    appgw.ingress.kubernetes.io/rewrite-target: /   
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+    appgw.ingress.kubernetes.io/rewrite-rule-set: SetSecurityHeaders
+    --------------------------------------------
+ networkAccessPolicy : AllowPrivate
+ publicnetworkacess: Disabled
+ diskAccessID:
+--------------------------------------
